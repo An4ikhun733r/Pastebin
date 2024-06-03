@@ -1,24 +1,17 @@
 import express from "express";
-import jwt from "jsonwebtoken";
+
 import mongoose from "mongoose";
 import {
   loginValidation,
   postValidation,
   registerValidation,
 } from "./validations/validations.js";
-import { validationResult } from "express-validator";
+
 import UserModel from "./models/User.js";
-import bcrypt from "bcrypt";
-import checkAuth from "./utils/checkAuth.js";
-import { getMe, login, register } from "./controllers/UserController.js";
-import {
-  create,
-  getAll,
-  getOne,
-  remove,
-  update,
-} from "./controllers/PostController.js";
+
+import {getAll, getMe, getOne, login, register, create, remove, update} from "./controllers/index.js"
 import multer from "multer";
+import {handleValidationErrors, checkAuth} from "./utils/index.js";
 
 mongoose
   .connect(
@@ -45,10 +38,15 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
+app.use("/uploads", express.static("uploads"));
 
-app.post("/auth/login", loginValidation, login);
-app.post("/auth/register", registerValidation, register);
+app.post("/auth/login", loginValidation, handleValidationErrors, login);
+app.post(
+  "/auth/register",
+  registerValidation,
+  handleValidationErrors,
+  register
+);
 app.get("/auth/me", checkAuth, getMe);
 
 app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
@@ -59,10 +57,16 @@ app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
 });
 
 app.get("/posts", getAll);
-app.get("/posts/:id", getOne);
-app.post("/posts", checkAuth, postValidation, create);
+app.get("/posts/:shortUrl", getOne);
+app.post("/posts", checkAuth, postValidation, handleValidationErrors, create);
 app.delete("/posts/:id", checkAuth, remove);
-app.patch("/posts/:id", checkAuth, update);
+app.patch(
+  "/posts/:id",
+  checkAuth,
+  postValidation,
+  handleValidationErrors,
+  update
+);
 
 app.listen(4444, (err) => {
   if (err) {

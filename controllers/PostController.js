@@ -8,6 +8,7 @@ export const create = async (req, res) => {
       imageUrl: req.body.imageUrl,
       tags: req.body.tags,
       user: req.userId,
+      shortUrl: req.shortUrl,
     });
 
     const post = await doc.save();
@@ -35,17 +36,17 @@ export const getAll = async (req, res) => {
 
 export const getOne = async (req, res) => {
   try {
-    const postId = req.params.id;
+    const url = req.params.shortUrl;
     await PostModel.findOneAndUpdate(
       {
-        _id: postId,
+        shortUrl: url,
       },
       {
         $inc: { viewsCount: 1 },
       }
     );
 
-    const post = await PostModel.findOne({ _id: postId }).populate("user");
+    const post = await PostModel.findOne({ shortUrl: url }).populate("user");
     res.json(post);
   } catch (err) {
     console.log(err);

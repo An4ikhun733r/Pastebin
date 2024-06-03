@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
+import shortid from "shortid";
 
 const PostSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: true,
-    },
+    },  
     tags: { type: Array, default: [] },
     text: {
       type: String,
@@ -21,6 +22,10 @@ const PostSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    shortUrl: {
+      type: String,
+      default: shortid.generate,
+    }
   },
   {
     timestamps: true,
